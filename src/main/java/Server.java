@@ -1,37 +1,65 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 
 public class Server {
-    private final static int PORT = 8080;
 
     public static void main(String[] args) throws IOException
     {
-        ServerSocket serverSocket = new ServerSocket(PORT);
+        System.out.println(Arrays.asList(args).toString());
+        File file = new File(args[0]);
+//        ServerSocket ss=new ServerSocket(8080);
+//        Socket s=ss.accept();
+//        OutputStream os = s.getOutputStream();
+//        os.write("HTTP/1.0 200 OK\r\n".getBytes());
+//
+//        InputStream input = Files.newInputStream(Path.of("D:\\csweb\\index.html"));
+//        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+//        byte[] data = new byte[1024];
+//        int totRead = 0,numRead;
+//        while ((numRead = input.read(data)) != -1) {
+//            totRead += numRead;
+//            os.write(data,0, numRead);
+//        }
+////            os.write(("Content-Length: " + totRead + "\r\n").getBytes());
+//        s.close();
 
-        System.out.println("Listening on port " + PORT);
+        Socket socket ;
+        InputStreamReader inputStreamReader ;
+        OutputStreamWriter outputStreamWriter ;
+        BufferedReader bufferedReader ;
+        BufferedWriter bufferedWriter ;
+        ServerSocket serversocket ;
 
-        while (true) {
-            try (Socket socket = serverSocket.accept();
-                 InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-                 BufferedReader in = new BufferedReader(isr);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
-            ) {
-                System.out.println("Connection accepted");
+        serversocket = new ServerSocket(5000);
 
-                String line;
-                while ((line = in.readLine()) != null) {
-                    System.out.println("Server received: " + line + ". Sending to client");
-                    out.println(line);
+        while (true) try {
 
-                    if (line.equals("Bye")) {
-                        break;
-                    }
-                }
-            }
+            socket = serversocket.accept();
+
+            OutputStream os = socket.getOutputStream();
+        os.write("HTTP/1.0 200 OK\r\n".getBytes());
+
+//        InputStream input = Files.newInputStream(Path.of("D:\\csweb\\index.html"));
+            InputStream input = Files.newInputStream(Path.of(file.toURI()));
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[1024];
+        int totRead = 0,numRead;
+        while ((numRead = input.read(data)) != -1) {
+            totRead += numRead;
+            os.write(data,0, numRead);
+        }
+//            os.write(("Content-Length: " + totRead + "\r\n").getBytes());
+        socket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
+
+
 }
